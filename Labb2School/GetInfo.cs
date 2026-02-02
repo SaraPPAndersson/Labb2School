@@ -22,7 +22,7 @@ namespace Labb2School
                 {
                     //get student sorting by last name asc 
                     var studentsOrderByLastName = context.Students
-                        .OrderBy(s => s.LastName)
+                        .OrderBy(st => st.LastName)
                         .ToList();
                     //send the list to a method 
                     PrintStudentInfo(studentsOrderByLastName);
@@ -31,7 +31,7 @@ namespace Labb2School
                 {
                     //else get with last name but sort DESC 
                     var studentsOrderByLastName = context.Students
-                    .OrderByDescending(s => s.LastName)
+                    .OrderByDescending(st => st.LastName)
                     .ToList();
                     PrintStudentInfo(studentsOrderByLastName);
                 }
@@ -46,7 +46,7 @@ namespace Labb2School
                 if (IsAscending)
                 {
                     var studentsOrderByFirstName = context.Students
-                    .OrderBy(s => s.FirstName)
+                    .OrderBy(st => st.FirstName)
                     .ToList();
 
                     PrintStudentInfo(studentsOrderByFirstName);
@@ -54,7 +54,7 @@ namespace Labb2School
                 else
                 {
                     var studentsOrderByFirstName = context.Students
-                   .OrderByDescending(s => s.FirstName)
+                   .OrderByDescending(st => st.FirstName)
                    .ToList();
 
                     PrintStudentInfo(studentsOrderByFirstName);
@@ -111,10 +111,10 @@ namespace Labb2School
                 Console.WriteLine("----------------------------");
 
                 Console.WriteLine("Förnamn: ");
-                string firstName = Console.ReadLine();
+                string firstName = Console.ReadLine()?? "";
 
                 Console.WriteLine("Efternamn: ");
-                string lastName = Console.ReadLine();
+                string lastName = Console.ReadLine()?? "";
 
                 int roleId = 0;
                 bool validInputId = false;

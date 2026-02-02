@@ -92,7 +92,7 @@ namespace Labb2School
                     //Send  the selected classId input to the method to get the students in the class
                     GetInfo.GetStudentsByClass(classId);
                 }
-            }
+            
         }
     }
 }
