@@ -13,9 +13,9 @@ public partial class Grade
 
     public int SubjectId { get; set; }
 
-    public string Grade1 { get; set; } = null!;
+    public string? Grade1 { get; set; }
 
-    public DateOnly GradeDate { get; set; }
+    public DateOnly? GradeDate { get; set; }
 
     public virtual Staff Staff { get; set; } = null!;
 

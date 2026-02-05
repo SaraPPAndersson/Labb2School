@@ -63,15 +63,43 @@ namespace Labb2School
         }
         internal static void PrintStudentInfo(List<Student> students)
         {
-            //Recive a list and print 
-            Console.WriteLine("Lista med alla studenter:\n");
+                //Recive a list and print 
+                Console.WriteLine("Lista med alla studenter:\n");
             foreach (var student in students)
             {
-                Console.WriteLine($"{student.FirstName} {student.LastName}");
+                Console.WriteLine($"{student.StudentId}. {student.Class.ClassName} {student.FirstName} {student.LastName} {student.PersonalNumber}");
             }
             Console.ReadKey();
             Console.Clear();
         }
+        internal static void PrintAllStudentsInfo()
+        {
+            using (var context = new Labb2SchoolContext())
+            {
+                var students = context.Students
+                    .Include(st => st.Class)
+                    .ToList();
+                PrintStudentInfo(students);
+            }
+        }
+        internal static void ShowActiveSubject()
+        {
+            using (var context = new Labb2SchoolContext())
+            {
+                var subjects = context.Subjects
+                    .OrderBy(sub => sub.SubjectName)
+                    .ToList();
+
+                Console.WriteLine("Aktiva ämne");
+
+                foreach (var subject in subjects)
+                {
+                    Console.WriteLine($"{subject.SubjectId}. {subject.SubjectName} {subject.CourseCode}");
+                }
+
+            }
+        }
+       
         internal static void GetStudentsByClass(int classId)
         {
             using (var context = new Labb2SchoolContext())
@@ -99,7 +127,7 @@ namespace Labb2School
 
                     foreach (var c in printClasses)
                     {
-                        Console.WriteLine($"{c.ClassId}.  {c.ClassName} årskurs: {c.GradeLevel}");  
+                        Console.WriteLine($"{c.ClassId}.  {c.ClassName}");  
                     }
             }
         }
@@ -120,7 +148,7 @@ namespace Labb2School
                 bool validInputId = false;
                 while (!validInputId)
                 {
-                    Console.WriteLine("Avdelning: ");
+                    Console.WriteLine("Titel: ");
                     GetStaffId();
 
                     if (!int.TryParse(Console.ReadLine(), out roleId) || roleId < 1 || roleId > 4)
@@ -186,17 +214,44 @@ namespace Labb2School
 
                 foreach (var s in staffWithRoleName)
                 {
-                    Console.WriteLine($"{s.StaffId}. {s.Name},   Avdelning: {s.RoleName}");
+                    Console.WriteLine($"{s.StaffId}. {s.Name},   Roll: {s.RoleName}");
                 }
                 Console.WriteLine("Tryck på en knapp");
                 Console.ReadKey();
                 Console.Clear();
             }
         }
+
         internal static void PrintErrorMessage()
         {
             Console.WriteLine("Fel värde, försök igen!");
         }
 
+        internal static void CountTeacherInDepartment()
+        {
+            using (var context = new Labb2SchoolContext())
+            {
+                var TeacherInDepartment = context.Staff
+                    .Where(s => s.Role.RoleName == "Teacher")
+                    .GroupBy(s => s.Department.DepartmentName)
+                    .Select(group => new
+                    {
+                        Department = group.Key,
+                        Count = group.Count(),
+
+                    })
+                    .OrderBy(r => r.Department)
+                    .ToList();
+
+
+                foreach (var r in TeacherInDepartment)
+                {
+                    Console.WriteLine($"{r.Department} har {r.Count} lärare");
+                }
+                Console.WriteLine("Tryck på en knapp");
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
     }
 }

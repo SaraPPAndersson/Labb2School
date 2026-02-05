@@ -1,4 +1,5 @@
 ﻿using System;
+using Labb2School.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,17 +21,24 @@ namespace Labb2School
             Console.WriteLine("3. Hämta alla elever i en viss klass");
             Console.WriteLine("4. Lägga till en ny personal");
             Console.WriteLine("5. Hämta alla personal");
+            Console.WriteLine("6. ViewStaff ADO");
+            Console.WriteLine("7. Betyg ADO");
+            Console.WriteLine("8. Department Salary ADO");
+            Console.WriteLine("9. Average salary ADO");
+            Console.WriteLine("10. Hämta student info");
+            Console.WriteLine("11. Aktiva ämne");
+            Console.WriteLine("12. Räkna lärare i avdelning");
             Console.WriteLine("0. Avsluta");
 
                 //Keeps asking for valid input. 
             int choice;
-            while (!int.TryParse(Console.ReadLine(), out choice) || choice < 0 || choice > 5)
+            while (!int.TryParse(Console.ReadLine(), out choice) || choice < 0 || choice > 12)
             {
                 GetInfo.PrintErrorMessage();
             }
                 Console.Clear();
 
-            switch (choice)
+                switch (choice)
             {
                 case 1:
                     GetInfo.OrderByFirstName();
@@ -42,11 +50,35 @@ namespace Labb2School
                      MenuToChooseSpecificClass();
                     break;
                 case 4:
-                     GetInfo.AddStaff();
+                        ADO.InsertNewStaffInfo();
                      break;
                 case 5:
                      GetInfo.PrintStaffInfo();
                      break;
+                case 6:
+                        ADO.ViewStaff();
+                        break;
+                case 7:
+                        ADO.ViewStudentsInfo();
+                        Console.WriteLine("Skriv student Id:");
+                        int studentId = int.Parse(Console.ReadLine());
+                        ADO.ViewStudentsGrade(studentId);
+                        break;
+                case 8:
+                        ADO.ViewSalaryPerDepartment();
+                        break;
+                case 9:
+                        ADO.AverageSalary();
+                        break;
+                case 10:
+                        GetInfo.PrintAllStudentsInfo();
+                        break;
+                case 11:
+                        GetInfo.ShowActiveSubject();
+                        break;
+                case 12:
+                        GetInfo.CountTeacherInDepartment();
+                            break;
                 case 0: 
                      active = false; //Stop the main menu loop and exist the program
                      Console.WriteLine("Avsluta programmet");
