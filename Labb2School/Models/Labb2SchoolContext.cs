@@ -17,6 +17,10 @@ public partial class Labb2SchoolContext : DbContext
 
     public virtual DbSet<Class> Classes { get; set; }
 
+    public virtual DbSet<Department> Departments { get; set; }
+
+    public virtual DbSet<GetStudentsGrade> GetStudentsGrades { get; set; }
+
     public virtual DbSet<Grade> Grades { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -27,9 +31,11 @@ public partial class Labb2SchoolContext : DbContext
 
     public virtual DbSet<Subject> Subjects { get; set; }
 
+    public virtual DbSet<ViewStudentsGrade> ViewStudentsGrades { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server = localhost; Database = Labb2School; Integrated Security = true; Trust Server Certificate = true;");
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=Labb2School;Integrated Security=true;TrustServerCertificate=true;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +54,42 @@ public partial class Labb2SchoolContext : DbContext
                 .HasForeignKey(d => d.ClassTeacherId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Classes__ClassTe__4CA06362");
+        });
+
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__B2079BED3BA32FFC");
+
+            entity.Property(e => e.DepartmentName)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<GetStudentsGrade>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("GetStudentsGrade");
+
+            entity.Property(e => e.ByTeacher)
+                .HasMaxLength(101)
+                .IsUnicode(false)
+                .HasColumnName("By Teacher");
+            entity.Property(e => e.CourseCode)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("Course Code");
+            entity.Property(e => e.Grade)
+                .HasMaxLength(2)
+                .IsUnicode(false);
+            entity.Property(e => e.SetOn).HasColumnName("Set on");
+            entity.Property(e => e.StudentName)
+                .HasMaxLength(101)
+                .IsUnicode(false)
+                .HasColumnName("Student Name");
+            entity.Property(e => e.Subject)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Grade>(entity =>
@@ -94,6 +136,11 @@ public partial class Labb2SchoolContext : DbContext
             entity.Property(e => e.LastName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.Salary).HasColumnType("decimal(10, 2)");
+
+            entity.HasOne(d => d.Department).WithMany(p => p.Staff)
+                .HasForeignKey(d => d.DepartmentId)
+                .HasConstraintName("FK_Staff_Departments");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Staff)
                 .HasForeignKey(d => d.RoleId)
@@ -133,6 +180,33 @@ public partial class Labb2SchoolContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.SubjectName)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<ViewStudentsGrade>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ViewStudentsGrade");
+
+            entity.Property(e => e.ByTeacher)
+                .HasMaxLength(101)
+                .IsUnicode(false)
+                .HasColumnName("By Teacher");
+            entity.Property(e => e.CourseCode)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("Course Code");
+            entity.Property(e => e.Grade)
+                .HasMaxLength(2)
+                .IsUnicode(false);
+            entity.Property(e => e.SetOn).HasColumnName("Set on");
+            entity.Property(e => e.StudentName)
+                .HasMaxLength(101)
+                .IsUnicode(false)
+                .HasColumnName("Student Name");
+            entity.Property(e => e.Subject)
                 .HasMaxLength(50)
                 .IsUnicode(false);
         });

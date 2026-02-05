@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Labb2School.Models;
 
-public partial class Role
+public partial class Department
 {
-    public int RoleId { get; set; }
+    public int DepartmentId { get; set; }
 
-    public string RoleName { get; set; } = null!;
+    public string? DepartmentName { get; set; }
 
     public virtual ICollection<Staff> Staff { get; set; } = new List<Staff>();
 }
