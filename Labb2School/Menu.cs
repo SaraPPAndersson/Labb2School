@@ -92,39 +92,43 @@ namespace Labb2School
             Console.WriteLine("1. Sortera efter stigande");
             Console.WriteLine("2. Sortera efter fallande");
 
-            int choice;
-            while (!int.TryParse(Console.ReadLine(), out choice) || choice < 1 || choice > 2)
-            {
-                GetInfo.PrintErrorMessage();
-            }
+            int choice = HandleChoice(1,2);
             Console.Clear();
             //return true if coice is 1 true = 1 and false = 2 
             return choice == 1;
         }
         internal static void MenuToChooseSpecificClass()
         {
-            int classId;
-            bool validInput = false;
-
             //Show all classes with classId
             GetInfo.GetClasses();
             Console.WriteLine("Välj vilken klass du vill hämta informationen:");
 
             //Keeps asking for input until a valid classId is entered 
-            while (!validInput) 
-                if (!int.TryParse(Console.ReadLine(), out classId) || classId < 1 || classId > 6)
+            int classId = HandleChoice(1,6);
+            //Send  the selected classId input to the method to get the students in the class
+            GetInfo.GetStudentsByClass(classId);
+                
+            
+        }
+        //To hande user's choice in range
+        internal static int HandleChoice(int min, int max)
+        {
+            int userChoice = 0;
+            bool validInput = false; 
+
+            while (!validInput)
+            {
+                if (!int.TryParse(Console.ReadLine(), out userChoice) || userChoice < min || userChoice > max)
                 {
                     GetInfo.PrintErrorMessage();
-                    continue; //go back and ask again
                 }
                 else
                 {
-                    //Correct input 
                     validInput = true;
-                    //Send  the selected classId input to the method to get the students in the class
-                    GetInfo.GetStudentsByClass(classId);
                 }
-            
+            }
+            return userChoice;
+
         }
     }
 }
