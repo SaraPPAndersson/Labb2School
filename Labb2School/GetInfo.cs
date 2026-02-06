@@ -10,13 +10,14 @@ namespace Labb2School
 {
     internal class GetInfo
     {
+
         internal static void OrderByLastName()
-        {   
+        {
             //Context connecting to the database
             using (var context = new Labb2SchoolContext())
             {
                 //ask user in menu if asc or desc 
-                bool IsAscending = Menu.StudentMenu();
+                bool IsAscending = Menu.StudentSortingMenu();
 
                 if (IsAscending)
                 {
@@ -41,7 +42,7 @@ namespace Labb2School
         {
             using (var context = new Labb2SchoolContext())
             {
-                bool IsAscending = Menu.StudentMenu();
+                bool IsAscending = Menu.StudentSortingMenu();
 
                 if (IsAscending)
                 {
@@ -63,14 +64,15 @@ namespace Labb2School
         }
         internal static void PrintStudentInfo(List<Student> students)
         {
-                //Recive a list and print 
-                Console.WriteLine("Lista med alla studenter:\n");
+            //Recive a list and print 
+            Console.WriteLine("Lista med alla studenter:\n");
             foreach (var student in students)
             {
-                Console.WriteLine($"{student.StudentId}. {student.Class.ClassName} {student.FirstName} {student.LastName} {student.PersonalNumber}");
+                Console.WriteLine($"{student.FirstName} {student.LastName}");
             }
             Console.ReadKey();
             Console.Clear();
+
         }
         internal static void PrintAllStudentsInfo()
         {
@@ -81,6 +83,13 @@ namespace Labb2School
                     .ToList();
                 PrintStudentInfo(students);
             }
+        }
+        internal static void PrintStudentList()
+        {
+            using var context = new Labb2SchoolContext();
+
+            int count = context.Students.Count();
+                Console.WriteLine($"Välj student id mellan 1-{count}");
         }
         internal static void ShowActiveSubject()
         {
@@ -99,7 +108,7 @@ namespace Labb2School
 
             }
         }
-       
+
         internal static void GetStudentsByClass(int classId)
         {
             using (var context = new Labb2SchoolContext())
@@ -125,10 +134,10 @@ namespace Labb2School
             {
                 var printClasses = context.Classes.ToList();
 
-                    foreach (var c in printClasses)
-                    {
-                        Console.WriteLine($"{c.ClassId}.  {c.ClassName}");  
-                    }
+                foreach (var c in printClasses)
+                {
+                    Console.WriteLine($"{c.ClassId}.  {c.ClassName}");
+                }
             }
         }
         internal static void AddStaff()
@@ -139,16 +148,16 @@ namespace Labb2School
                 Console.WriteLine("----------------------------");
 
                 Console.WriteLine("Förnamn: ");
-                string firstName = Console.ReadLine()?? "";
+                string firstName = Console.ReadLine() ?? "";
 
                 Console.WriteLine("Efternamn: ");
-                string lastName = Console.ReadLine()?? "";
+                string lastName = Console.ReadLine() ?? "";
 
                 int roleId = 0;
                 bool validInputId = false;
                 while (!validInputId)
                 {
-                    Console.WriteLine("Titel: ");
+                    Console.WriteLine("Position: ");
                     GetStaffId();
 
                     if (!int.TryParse(Console.ReadLine(), out roleId) || roleId < 1 || roleId > 4)
@@ -189,9 +198,9 @@ namespace Labb2School
                 foreach (var r in roles)
                 {
                     Console.WriteLine($"{r.RoleId}. {r.RoleName}");
-                    
+
                 }
-               
+
             }
         }
         internal static void PrintStaffInfo()
@@ -227,6 +236,7 @@ namespace Labb2School
             Console.WriteLine("Fel värde, försök igen!");
         }
 
+
         internal static void CountTeacherInDepartment()
         {
             using (var context = new Labb2SchoolContext())
@@ -253,5 +263,29 @@ namespace Labb2School
                 Console.Clear();
             }
         }
+        internal static void GetStudentsWithAndWithoutGrade()
+        {
+            using var context = new Labb2SchoolContext();
+            var studentsWithAndWithoutGrade = context.Students
+                .GroupJoin(
+                    context.Grades,
+                    st => st.StudentId,
+                    g => g.StudentId,
+                    (st, grades) => new
+                    {
+                        StudentName = st.FirstName + " " + st.LastName,
+                        HasGrade = grades.Any()
+                    })
+                .ToList();
+
+            foreach (var st in studentsWithAndWithoutGrade)
+            {
+                Console.WriteLine($"{st.StudentName} - {(st.HasGrade ? "Har betyg" : "Saknar betyg")}");
+            }
+
+        }
+
     }
+
 }
+
