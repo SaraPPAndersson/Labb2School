@@ -158,7 +158,7 @@ namespace Labb2School
             }
         }
 
-        internal static void AddNewStaff(string FirstName, string LastName, int RoleId, int DepartmentId, decimal Salary, DateOnly EmploymentDate)
+        internal static void AddNewStaff(string FirstName, string LastName, int RoleId, int DepartmentId, decimal Salary, DateTime EmploymentDate)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -209,8 +209,8 @@ namespace Labb2School
             Console.WriteLine("Lön: ");
             decimal Salary = decimal.Parse(Console.ReadLine());
 
-            Console.WriteLine("anställningsdatum: ");
-            DateOnly EmploymentDate = DateOnly.Parse(Console.ReadLine());
+            Console.WriteLine("anställningsdatum yyyy-mm-dd:  ");
+            DateTime EmploymentDate = DateTime.Parse(Console.ReadLine());
 
             AddNewStaff(FirstName, LastName, RoleId, DepartmentId, Salary, EmploymentDate);
         }
@@ -234,7 +234,7 @@ namespace Labb2School
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                var command = new SqlCommand("spShowStudentDetailsById", connection);
+                var command = new SqlCommand("ShowStudentDetailsById", connection);
 
                 command.CommandType = CommandType.StoredProcedure;
 
@@ -262,5 +262,6 @@ namespace Labb2School
                 }
             }
         }
+
     }
 }
