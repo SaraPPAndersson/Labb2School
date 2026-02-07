@@ -36,6 +36,7 @@ namespace Labb2School
                     .ToList();
                     PrintStudentInfo(studentsOrderByLastName);
                 }
+                Menu.ReadKeyAndClear();
             }
         }
         internal static void OrderByFirstName()
@@ -60,15 +61,25 @@ namespace Labb2School
 
                     PrintStudentInfo(studentsOrderByFirstName);
                 }
+                Menu.ReadKeyAndClear();
             }
         }
         internal static void PrintStudentInfo(List<Student> students)
         {
             //Recive a list and print 
+
             Console.WriteLine("Lista med alla studenter:\n");
+            int width = 25;
+            Console.Write("Förnamn".PadRight(15));
+            Console.Write("Efternamn".PadRight(15));
+            Console.WriteLine();
+            Console.WriteLine(new string('-', width));
+
             foreach (var student in students)
             {
-                Console.WriteLine($"{student.FirstName} {student.LastName}");
+                Console.Write($"{student.FirstName}".PadRight(15));
+                Console.Write($"{student.LastName}".PadRight(15));
+                Console.WriteLine();
             }
             Console.ReadKey();
             Console.Clear();
@@ -81,7 +92,29 @@ namespace Labb2School
                 var students = context.Students
                     .Include(st => st.Class)
                     .ToList();
-                PrintStudentInfo(students);
+               
+                Console.WriteLine("Lista med alla studenter:\n");
+
+                int width = 20;
+                //Header 
+                Console.Write("Id".PadRight(8));
+                Console.Write("Namn".PadRight(width));
+                Console.Write("Klass".PadRight(8));
+                Console.Write("Personnummer".PadRight(width));
+                Console.WriteLine();
+                Console.WriteLine(new string('-', width * 3));
+                
+                //Recive a list and print 
+
+                foreach (var student in students)
+                {
+                    Console.Write(student.StudentId.ToString().PadRight(8));
+                    Console.Write($"{student.FirstName} {student.LastName}".PadRight(20));
+                    Console.Write(student.Class.ClassName.PadRight(8));
+                    Console.Write(student.PersonalNumber.PadRight(20));
+                    Console.WriteLine();
+                }
+                Menu.ReadKeyAndClear();
             }
         }
         internal static void PrintStudentList()
@@ -89,7 +122,7 @@ namespace Labb2School
             using var context = new Labb2SchoolContext();
 
             int count = context.Students.Count();
-                Console.WriteLine($"Välj student id mellan 1-{count}");
+            Console.WriteLine($"Välj student id mellan 1-{count}");
         }
         internal static void ShowActiveSubject()
         {
@@ -106,6 +139,7 @@ namespace Labb2School
                     Console.WriteLine($"{subject.SubjectId}. {subject.SubjectName} {subject.CourseCode}");
                 }
 
+                Menu.ReadKeyAndClear();
             }
         }
 
@@ -128,6 +162,7 @@ namespace Labb2School
 
             }
         }
+        //To show classId and className to facilitate user's choice
         internal static void GetClasses()
         {
             using (var context = new Labb2SchoolContext())
@@ -236,7 +271,7 @@ namespace Labb2School
             Console.WriteLine("Fel värde, försök igen!");
         }
 
-
+        //Calculate teachers in each department
         internal static void CountTeacherInDepartment()
         {
             using (var context = new Labb2SchoolContext())
@@ -263,6 +298,7 @@ namespace Labb2School
                 Console.Clear();
             }
         }
+        //Show students with and without grade before set grade transaction
         internal static void GetStudentsWithAndWithoutGrade()
         {
             using var context = new Labb2SchoolContext();
@@ -273,19 +309,100 @@ namespace Labb2School
                     g => g.StudentId,
                     (st, grades) => new
                     {
+                        StudentId = st.StudentId,
                         StudentName = st.FirstName + " " + st.LastName,
-                        HasGrade = grades.Any()
+                        HasGrade = context.Grades.Any(g => g.StudentId == st.StudentId && g.Grade1 != null)
                     })
                 .ToList();
 
             foreach (var st in studentsWithAndWithoutGrade)
             {
-                Console.WriteLine($"{st.StudentName} - {(st.HasGrade ? "Har betyg" : "Saknar betyg")}");
+                Console.WriteLine($"{st.StudentId}. {st.StudentName} - {(st.HasGrade ? "Har betyg" : "Saknar betyg")}");
             }
 
         }
+        //Print list of teachers for user's to set grade 
+        internal static void PrintTeachers()
+        {
+            using (var context = new Labb2SchoolContext())
+            {
+                var teachers = context.Staff
+                    .Where(s => s.Role.RoleName == "Teacher")
+                    .Select(s => new
+                    {
+                        s.StaffId,
+                        s.FirstName,
+                        s.LastName
+                    })
+                    .ToList();
 
+                foreach (var teacher in teachers)
+                {
+                    Console.WriteLine($"{teacher.StaffId}. {teacher.FirstName} {teacher.LastName} ");
+                }
+            }
+
+        }
+        //Get the numbers of all students with id
+        internal static int GetMaxStudentId()
+        {
+            using var context = new Labb2SchoolContext();
+            {
+                //Check if there are any studentId in database 
+                if (context.Students.Any())
+                {
+                    //Return highest studentid in students
+                    return context.Students.Max(st => st.StudentId);
+                }
+                else
+                {
+                    //return 1 to avoid crash if Students is empty
+                    return 1;
+                }
+            }
+        }
+        internal static int GetMaxSubjectId()
+        {
+            using var context = new Labb2SchoolContext();
+            {
+                if (context.Subjects.Any())
+                {
+                    return context.Subjects.Max(st => st.SubjectId);
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+        }
+        internal static int GetMaxRoletId()
+        {
+            using var context = new Labb2SchoolContext();
+            {
+                if (context.Roles.Any())
+                {
+                    return context.Roles.Max(st => st.RoleId);
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+        }
+        internal static int GetMaxDepartmentId()
+        {
+            using var context = new Labb2SchoolContext();
+            {
+                if (context.Departments.Any())
+                {
+                    return context.Departments.Max(st => st.DepartmentId);
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+        }
     }
-
 }
 
