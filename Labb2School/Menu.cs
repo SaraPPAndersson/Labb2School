@@ -53,9 +53,10 @@ namespace Labb2School
                 Console.WriteLine("5. Visa aktiva kurser");
                 Console.WriteLine("6. Visa betyg för elev");
                 Console.WriteLine("7. Visa elev med ID");
+                Console.WriteLine("8. Sätta betyg");
                 Console.WriteLine("0. Tillbaka");
 
-                int choice = HandleChoice(0, 7);
+                int choice = HandleChoice(0, 8);
                 Console.Clear();
 
                 switch (choice)
@@ -74,7 +75,6 @@ namespace Labb2School
                         break;
                     case 5:
                         GetInfo.ShowActiveSubject();
-                        Console.Clear();
                         break;
                     case 6:
                         {
@@ -88,11 +88,14 @@ namespace Labb2School
                         }
                     case 7:
                         {
-                            Console.WriteLine("Skriv student Id:");
+                            GetInfo.PrintStudentList();
                             int studentId = int.Parse(Console.ReadLine());
                             ADO.PrintStudentById(studentId);
                             break;
                         }
+                    case 8:
+                        ADO.InputGrade();
+                        break;
                     case 0:
                         running = false;
                         break;
