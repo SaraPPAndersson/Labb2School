@@ -24,7 +24,7 @@ namespace Labb2School
                     "s.FirstName + ' ' + s.LastName AS Namn, " +
                     "r.RoleName AS Position, " +
                     "d.DepartmentName AS Avdelning, " +
-                    "s.Salary, " +
+                    "s.Salary AS Lön, " +
                     "FORMAT(s.EmploymentDate, 'yyyy-MM-dd') AS Anställningsdatum " +
                     "FROM Staff s " +
                     "LEFT JOIN Roles r ON s.RoleId = r.RoleId " +
@@ -96,6 +96,7 @@ namespace Labb2School
                     {
                         Console.WriteLine("SQL FEL: " + ex.Message);
                     }
+                    Menu.ReadKeyAndClear();
                 }
             }
         }
@@ -160,7 +161,6 @@ namespace Labb2School
                             Console.WriteLine();
                         }
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -318,6 +318,8 @@ namespace Labb2School
             DateTime gradeDate = DateTime.Parse(Console.ReadLine());
 
             SetGrade(grade, gradeDate, staffId, studentId, subjectId);
+
+            Menu.ReadKeyAndClear();
         }
         //Set grade on student with transaction
         internal static void SetGrade(string grade, DateTime gradeDate, int staffId, int studentId, int subjectId)

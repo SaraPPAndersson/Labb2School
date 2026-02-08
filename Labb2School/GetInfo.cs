@@ -67,7 +67,6 @@ namespace Labb2School
         internal static void PrintStudentInfo(List<Student> students)
         {
             //Recive a list and print 
-
             Console.WriteLine("Lista med alla studenter:\n");
             int width = 25;
             Console.Write("Förnamn".PadRight(15));
@@ -233,9 +232,7 @@ namespace Labb2School
                 foreach (var r in roles)
                 {
                     Console.WriteLine($"{r.RoleId}. {r.RoleName}");
-
                 }
-
             }
         }
         internal static void PrintStaffInfo()
