@@ -306,7 +306,7 @@ namespace Labb2School
                     g => g.StudentId,
                     (st, grades) => new
                     {
-                        StudentId = st.StudentId,
+                        st.StudentId,
                         StudentName = st.FirstName + " " + st.LastName,
                         HasGrade = context.Grades.Any(g => g.StudentId == st.StudentId && g.Grade1 != null)
                     })
