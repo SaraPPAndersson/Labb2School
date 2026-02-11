@@ -76,23 +76,15 @@ namespace Labb2School
                     case 5:
                         GetInfo.ShowActiveSubject();
                         break;
-                    case 6:
-                        {
-                            ADO.ViewStudentsInfo();
-                            Console.WriteLine("Skriv student Id:");
-                            int studentId = int.Parse(Console.ReadLine());
-                            Console.Clear();
-
-                            ADO.ViewStudentsGrade(studentId);
-                            break;
-                        }
+                    case 6:                  
+                            ADO.ViewStudentsSubjects();
+                            break;                       
                     case 7:
-                        {
                             GetInfo.PrintStudentList();
                             int studentId = int.Parse(Console.ReadLine());
-                            ADO.PrintStudentById(studentId);
+
+                            ADO.ViewStudentFullInfo(studentId);
                             break;
-                        }
                     case 8:
                         ADO.InputGrade();
                         break;
