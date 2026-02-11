@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Labb2School
@@ -47,58 +48,33 @@ namespace Labb2School
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 string query = @"
-                        SELECT 
-                        g.Grade,
+                    SELECT 
+                        st.StudentId AS [Student Id],
                         st.FirstName + ' ' + st.LastName AS [Elev namn],
-                        sub.SubjectName AS [Ämne],
-                        sub.CourseCode AS [Kurskod],
-                        s.FirstName + ' ' + s.LastName AS [Lärare],
-                        FORMAT(g.GradeDate, 'yyyy-MM-dd') AS [Datum]
-                        FROM Students st
-                        LEFT JOIN Grades g ON st.StudentId = g.StudentId
-                        LEFT JOIN Subjects sub ON g.SubjectId = sub.SubjectId
-                        LEFT JOIN Staff s ON g.StaffId = s.StaffId
-                        WHERE st.StudentId = @StudentId
-                        ORDER BY g.GradeDate DESC;";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@StudentId", studentId);
-
-                    connection.Open();
-
-                    try
-                    {
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            if (!reader.HasRows)
-                            {
-                                Console.WriteLine("Den här eleven har inga betyg ännu.");
-                                return;
-                            }
-
-                            int width = 20;
-
-                            for (int i = 0; i < reader.FieldCount; i++)
-                                Console.Write(reader.GetName(i).PadRight(width));
-                            Console.WriteLine();
-                            Console.WriteLine(new string('-', reader.FieldCount * width));
-
-                            while (reader.Read())
-                            {
-                                for (int i = 0; i < reader.FieldCount; i++)
-                                    Console.Write(reader.GetValue(i).ToString().PadRight(width));
-                                Console.WriteLine();
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("SQL FEL: " + ex.Message);
-                    }
-                    Menu.ReadKeyAndClear();
-                }
+                        ISNULL(sub.SubjectName, '-') AS [Ämne],
+                        ISNULL(g.Grade, '-') AS [Betyg],
+                        ISNULL(s.FirstName + ' ' + s.LastName, '-') AS [Lärare],
+                        ISNULL(FORMAT(g.GradeDate, 'yyyy-MM-dd'), '-') AS [Datum]
+                    FROM Students st
+                    LEFT JOIN Grades g ON st.StudentId = g.StudentId
+                    LEFT JOIN Subjects sub ON g.SubjectId = sub.SubjectId
+                    LEFT JOIN Staff s ON g.StaffId = s.StaffId
+                    WHERE st.StudentId = @StudentId
+                    ORDER BY sub.SubjectName, g.GradeDate DESC;";
+               
+                ExecuteQueryWithStudentId(query, studentId);
             }
+        }
+        internal static void ViewStudentFullInfo(int studentId)
+        {
+            Console.WriteLine("---Information om elven---");
+            PrintStudentById(studentId);
+
+            Console.WriteLine();
+            Console.WriteLine("--- Betyghistorik---");
+            ViewStudentsGrade(studentId);
+
+            Menu.ReadKeyAndClear();
         }
         //sum salary in each department
         internal static void ViewSalaryPerDepartment()
@@ -147,12 +123,12 @@ namespace Labb2School
                     {
                         int columns = reader.FieldCount;
 
-                        int width = 20;
+                        int width = 21;
 
                         for (int i = 0; i < reader.FieldCount; i++)
                             Console.Write(reader.GetName(i).PadRight(width));
                         Console.WriteLine();
-                        Console.WriteLine(new string('-', reader.FieldCount * width));
+                        Console.WriteLine(new string('-', reader.FieldCount * 20));
 
                         while (reader.Read())
                         {
@@ -220,8 +196,12 @@ namespace Labb2School
             int DepartmentId = Menu.HandleChoice(1, GetInfo.GetMaxDepartmentId());
 
             Console.WriteLine("Lön: ");
-            decimal Salary = decimal.Parse(Console.ReadLine());
+            decimal Salary;
 
+            if (!decimal.TryParse(Console.ReadLine(), out Salary))
+            {
+                Console.WriteLine("Fel input. Du måste skriva ett giltigt decimaltal.");
+            }
             Console.WriteLine("Anställningsdatum yyyy-mm-dd:  ");
             DateTime EmploymentDate = DateTime.Parse(Console.ReadLine());
 
@@ -266,44 +246,65 @@ namespace Labb2School
                             return;
                         }
 
-                        int width = 20;
+                        int width = 25;
 
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        Console.Write(reader.GetName(i).PadRight(width));
+                        Console.WriteLine();
+                        Console.WriteLine(new string('-', reader.FieldCount * width));
+
+                        while (reader.Read())
+                        {
                             for (int i = 0; i < reader.FieldCount; i++)
-                                Console.Write(reader.GetName(i).PadRight(width));
+                                Console.Write(reader.GetValue(i).ToString().PadRight(width));
                             Console.WriteLine();
-                            Console.WriteLine(new string('-', reader.FieldCount * width));
-
-                            while (reader.Read())
-                            {
-                                for (int i = 0; i < reader.FieldCount; i++)
-                                    Console.Write(reader.GetValue(i).ToString().PadRight(width));
-                                Console.WriteLine();
-                            }
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
-
-                Menu.ReadKeyAndClear();
             }
         }
         //To revice input to set grade 
         internal static void InputGrade()
         {
-            GetInfo.GetStudentsWithAndWithoutGrade();
+            ViewStudentsSubjects();
 
             Console.WriteLine("Student Id: ");
             int studentId = Menu.HandleChoice(1, GetInfo.GetMaxStudentId());
 
-            GetInfo.ShowActiveSubject();
-            Console.WriteLine("Kurs Id: ");
-            int subjectId = Menu.HandleChoice(1, GetInfo.GetMaxSubjectId());
+            int subjectId;
+            bool validSubjectId;
+
+            do
+            {
+                Console.WriteLine("Elevs kurs utan betyg:");
+                ViewSubjectsWithoutGradeForStudent(studentId);
+
+                Console.WriteLine("Kurs Id: ");
+                subjectId = Menu.HandleChoice(1, GetInfo.GetMaxSubjectId());
+
+                validSubjectId = StudentHasSubject(studentId, subjectId);
+
+                if (!StudentHasSubject(studentId, subjectId))
+                {
+                    Console.WriteLine("Fel kurs Id, väl ett id som finns ovan");
+                    Menu.ReadKeyAndClear();
+                }
+            }
+            while (!validSubjectId);
 
             GetInfo.PrintTeachers();
             Console.WriteLine("Av lärare (Id): ");
-            int staffId = int.Parse(Console.ReadLine());
+            int staffId;
+
+            if (int.TryParse(Console.ReadLine(), out staffId))
+            {
+                Console.WriteLine("Fel input. Du måste skriva ett nummer");
+                return;
+            }
 
             string grade;
             do
@@ -333,12 +334,8 @@ namespace Labb2School
                     try
                     {
                         string query = @"
-                                UPDATE Grades
-                                Set Grade = @Grade,
-                                    GradeDate = @GradeDate,
-                                    StaffId = @StaffId
-                                WHERE StudentId = @StudentId
-                                AND SubjectId = @SubjectId";
+                            INSERT INTO Grades (StudentId, SubjectId, StaffId, Grade, GradeDate)
+                            VALUES (@StudentId, @SubjectId, @StaffId, @Grade, @GradeDate);";
 
                         using (var command = new SqlCommand(query, connection, transaction))
                         {
@@ -383,6 +380,90 @@ namespace Labb2School
                     Menu.ReadKeyAndClear();
                 }
             }
+        }
+        internal static void ViewStudentsSubjects()
+        {
+            string query = @"
+                SELECT 
+                    st.StudentId AS [Student Id],
+                    st.FirstName + ' ' + st.LastName AS [Namn],
+                    ISNULL(sub.CourseCode, '-') AS [Ämne],
+                    ISNULL(g.Grade, '-') AS [Betyg],
+                    ISNULL(s.FirstName + ' ' + s.LastName, '-') AS [Lärare],
+                    ISNULL(FORMAT(g.GradeDate, 'yyyy-MM-dd'), '-') AS [Datum]
+                FROM Students st
+                LEFT JOIN Grades g ON st.StudentId = g.StudentId
+                LEFT JOIN Subjects sub ON g.SubjectId = sub.SubjectId
+                LEFT JOIN Staff s ON g.StaffId = s.StaffId
+                ORDER BY st.StudentId, sub.SubjectName; ";
+
+            ExecuteQuery(query);
+            Menu.ReadKeyAndClear();
+        }
+
+
+        internal static void ExecuteQueryWithStudentId(string query, int studentId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            connection.Open();
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@StudentId", studentId);
+
+            using var reader = command.ExecuteReader();
+
+            if (!reader.HasRows)
+            {
+                Console.WriteLine("Inga rader hittades.");
+                return;
+            }
+
+            int width = 20;
+
+            for (int i = 0; i < reader.FieldCount; i++)
+                Console.Write(reader.GetName(i).PadRight(width));
+            Console.WriteLine();
+
+            Console.WriteLine(new string('-', reader.FieldCount * width));
+
+            while (reader.Read())
+            {
+                for (int i = 0; i < reader.FieldCount; i++)
+                    Console.Write(reader.GetValue(i).ToString().PadRight(width));
+                Console.WriteLine();
+            }
+        }
+        internal static void ViewSubjectsWithoutGradeForStudent(int studentId)
+        {
+            string query = @"
+                SELECT
+                    sub.SubjectId AS [Kurs Id],
+                    sub.SubjectName AS [Ämne]
+                    FROM Grades g
+                    JOIN Subjects sub ON g.SubjectId = sub.SubjectId
+                WHERE g.StudentId = @StudentId
+                AND g.Grade IS NULL
+                ORDER BY sub.SubjectName;";
+
+            ExecuteQueryWithStudentId(query, studentId);
+        }
+        //Checs a spesific student has a subject
+        internal static bool StudentHasSubject(int studentId, int subjectId)
+        {
+            string query = @"
+                SELECT * FROM Grades WHERE StudentId = @StudentId AND SubjectId = @SubjectId";
+
+            using var connection = new SqlConnection(_connectionString);
+
+            connection.Open();
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@StudentId", studentId);
+            command.Parameters.AddWithValue("@SubjectId", subjectId);
+
+            using var reader = command.ExecuteReader();
+
+            return reader.HasRows;
         }
 
     }

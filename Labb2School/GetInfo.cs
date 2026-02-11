@@ -91,7 +91,7 @@ namespace Labb2School
                 var students = context.Students
                     .Include(st => st.Class)
                     .ToList();
-               
+
                 Console.WriteLine("Lista med alla studenter:\n");
 
                 int width = 20;
@@ -102,15 +102,13 @@ namespace Labb2School
                 Console.Write("Personnummer".PadRight(width));
                 Console.WriteLine();
                 Console.WriteLine(new string('-', width * 3));
-                
-                //Recive a list and print 
 
                 foreach (var student in students)
                 {
                     Console.Write(student.StudentId.ToString().PadRight(8));
-                    Console.Write($"{student.FirstName} {student.LastName}".PadRight(20));
+                    Console.Write($"{student.FirstName} {student.LastName}".PadRight(width));
                     Console.Write(student.Class.ClassName.PadRight(8));
-                    Console.Write(student.PersonalNumber.PadRight(20));
+                    Console.Write(student.PersonalNumber.PadRight(width));
                     Console.WriteLine();
                 }
                 Menu.ReadKeyAndClear();
@@ -137,9 +135,8 @@ namespace Labb2School
                 {
                     Console.WriteLine($"{subject.SubjectId}. {subject.SubjectName} {subject.CourseCode}");
                 }
-
-                Menu.ReadKeyAndClear();
             }
+            Menu.ReadKeyAndClear();
         }
 
         internal static void GetStudentsByClass(int classId)
@@ -155,9 +152,7 @@ namespace Labb2School
                 {
                     Console.WriteLine($"{student.Class.ClassName}. {student.StudentId}. {student.FirstName} {student.LastName} - {student.PersonalNumber}");
                 }
-                Console.WriteLine("Tryck på en knapp");
-                Console.ReadKey();
-                Console.Clear();
+                Menu.ReadKeyAndClear();
 
             }
         }
@@ -172,94 +167,6 @@ namespace Labb2School
                 {
                     Console.WriteLine($"{c.ClassId}.  {c.ClassName}");
                 }
-            }
-        }
-        internal static void AddStaff()
-        {
-            using (var context = new Labb2SchoolContext())
-            {
-                Console.WriteLine("Lägga till en ny personal");
-                Console.WriteLine("----------------------------");
-
-                Console.WriteLine("Förnamn: ");
-                string firstName = Console.ReadLine() ?? "";
-
-                Console.WriteLine("Efternamn: ");
-                string lastName = Console.ReadLine() ?? "";
-
-                int roleId = 0;
-                bool validInputId = false;
-                while (!validInputId)
-                {
-                    Console.WriteLine("Position: ");
-                    GetStaffId();
-
-                    if (!int.TryParse(Console.ReadLine(), out roleId) || roleId < 1 || roleId > 4)
-                    {
-                        PrintErrorMessage();
-                        Console.Clear();
-                        continue;
-                    }
-                    else
-                    {
-                        validInputId = true;
-                    }
-                }
-                //Create a new staff and save in database
-                var newStaff = new Staff
-                {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    RoleId = roleId
-
-                };
-                context.Staff.Add(newStaff);
-                context.SaveChanges();
-
-                Console.WriteLine("Ny personal har sparat i systemet.");
-                Console.WriteLine("Tryck på en knapp");
-                Console.ReadKey();
-                Console.Clear();
-            }
-        }
-
-        internal static void GetStaffId()
-        {
-            using (var context = new Labb2SchoolContext())
-            {
-                var roles = context.Roles.ToList();
-
-                foreach (var r in roles)
-                {
-                    Console.WriteLine($"{r.RoleId}. {r.RoleName}");
-                }
-            }
-        }
-        internal static void PrintStaffInfo()
-        {
-            using (var context = new Labb2SchoolContext())
-            {
-                //JOIN conecting Staff.RoleId(FK) with Roles.RoleId(PK) and get RoleName 
-                var staffWithRoleName = context.Staff
-                                .Join(
-                                        context.Roles,
-                                        s => s.RoleId,
-                                        r => r.RoleId,
-                                        (s, r) => new
-                                        {
-                                            s.StaffId,
-                                            Name = s.FirstName + " " + s.LastName,
-                                            r.RoleName
-                                        })
-                                .ToList();
-
-                foreach (var s in staffWithRoleName)
-                {
-                    Console.WriteLine($"{s.StaffId}. {s.Name},   Roll: {s.RoleName}");
-                }
-                Console.WriteLine("Tryck på en knapp");
-                Console.ReadKey();
-                Console.Clear();
             }
         }
 
@@ -290,35 +197,9 @@ namespace Labb2School
                 {
                     Console.WriteLine($"{r.Department} har {r.Count} lärare");
                 }
-                Console.WriteLine("Tryck på en knapp");
-                Console.ReadKey();
-                Console.Clear();
+                Menu.ReadKeyAndClear();
             }
         }
-        //Show students with and without grade before set grade transaction
-        internal static void GetStudentsWithAndWithoutGrade()
-        {
-            using var context = new Labb2SchoolContext();
-            var studentsWithAndWithoutGrade = context.Students
-                .GroupJoin(
-                    context.Grades,
-                    st => st.StudentId,
-                    g => g.StudentId,
-                    (st, grades) => new
-                    {
-                        st.StudentId,
-                        StudentName = st.FirstName + " " + st.LastName,
-                        HasGrade = context.Grades.Any(g => g.StudentId == st.StudentId && g.Grade1 != null)
-                    })
-                .ToList();
-
-            foreach (var st in studentsWithAndWithoutGrade)
-            {
-                Console.WriteLine($"{st.StudentId}. {st.StudentName} - {(st.HasGrade ? "Har betyg" : "Saknar betyg")}");
-            }
-
-        }
-        //Print list of teachers for user's to set grade 
         internal static void PrintTeachers()
         {
             using (var context = new Labb2SchoolContext())
