@@ -51,20 +51,21 @@ namespace Labb2School
                     SELECT 
                         st.StudentId AS [Student Id],
                         st.FirstName + ' ' + st.LastName AS [Elev namn],
-                        ISNULL(sub.SubjectName, '-') AS [Ämne],
+                        ISNULL(sub.SubjectName, '-') AS Ämne,
                         ISNULL(g.Grade, '-') AS [Betyg],
-                        ISNULL(s.FirstName + ' ' + s.LastName, '-') AS [Lärare],
-                        ISNULL(FORMAT(g.GradeDate, 'yyyy-MM-dd'), '-') AS [Datum]
+                        ISNULL(s.FirstName + ' ' + s.LastName, '-') AS Lärare,
+                        ISNULL(FORMAT(g.GradeDate, 'yyyy-MM-dd'), '-') AS Datum
                     FROM Students st
                     LEFT JOIN Grades g ON st.StudentId = g.StudentId
                     LEFT JOIN Subjects sub ON g.SubjectId = sub.SubjectId
                     LEFT JOIN Staff s ON g.StaffId = s.StaffId
                     WHERE st.StudentId = @StudentId
                     ORDER BY sub.SubjectName, g.GradeDate DESC;";
-               
+
                 ExecuteQueryWithStudentId(query, studentId);
             }
         }
+        //Print student's selected by studentId info include with and without grades 
         internal static void ViewStudentFullInfo(int studentId)
         {
             Console.WriteLine("---Information om elven---");
@@ -203,7 +204,18 @@ namespace Labb2School
                 Console.WriteLine("Fel input. Du måste skriva ett giltigt decimaltal.");
             }
             Console.WriteLine("Anställningsdatum yyyy-mm-dd:  ");
-            DateTime EmploymentDate = DateTime.Parse(Console.ReadLine());
+            DateTime EmploymentDate;
+
+            while (!DateTime.TryParseExact(
+                Console.ReadLine(),
+                "yyyy-MM-dd",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out EmploymentDate))
+            {
+                Console.WriteLine("Fel format! Använd yyyy-mm-dd:");
+            }
+
 
 
             AddNewStaff(FirstName, LastName, RoleId, DepartmentId, Salary, EmploymentDate);
@@ -249,7 +261,7 @@ namespace Labb2School
                         int width = 25;
 
                         for (int i = 0; i < reader.FieldCount; i++)
-                        Console.Write(reader.GetName(i).PadRight(width));
+                            Console.Write(reader.GetName(i).PadRight(width));
                         Console.WriteLine();
                         Console.WriteLine(new string('-', reader.FieldCount * width));
 
@@ -267,7 +279,7 @@ namespace Labb2School
                 }
             }
         }
-        //To revice input to set grade 
+        //To recieve input to set grade 
         internal static void InputGrade()
         {
             ViewStudentsSubjects();
@@ -300,7 +312,8 @@ namespace Labb2School
             Console.WriteLine("Av lärare (Id): ");
             int staffId;
 
-            if (int.TryParse(Console.ReadLine(), out staffId))
+
+            if (!int.TryParse(Console.ReadLine(), out staffId))
             {
                 Console.WriteLine("Fel input. Du måste skriva ett nummer");
                 return;
@@ -316,8 +329,14 @@ namespace Labb2School
             while (grade.Length != 1 || !("ABCDEF".Contains(grade)));
 
             Console.WriteLine("Datum (yyyy-mm-dd)");
-            DateTime gradeDate = DateTime.Parse(Console.ReadLine());
+            DateTime gradeDate;
 
+            while (!DateTime.TryParseExact(Console.ReadLine(),"yyyy-MM-dd",
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            System.Globalization.DateTimeStyles.None,out gradeDate))
+            {
+                Console.WriteLine("Fel format! Använd yyyy-mm-dd:");
+            }
             SetGrade(grade, gradeDate, staffId, studentId, subjectId);
 
             Menu.ReadKeyAndClear();
@@ -381,6 +400,7 @@ namespace Labb2School
                 }
             }
         }
+        //Print all students' with and without grades 
         internal static void ViewStudentsSubjects()
         {
             string query = @"
@@ -433,6 +453,7 @@ namespace Labb2School
                 Console.WriteLine();
             }
         }
+        //View the student's course without grade only
         internal static void ViewSubjectsWithoutGradeForStudent(int studentId)
         {
             string query = @"
