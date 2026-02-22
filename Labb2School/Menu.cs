@@ -81,7 +81,12 @@ namespace Labb2School
                             break;                       
                     case 7:
                             GetInfo.PrintStudentList();
-                            int studentId = int.Parse(Console.ReadLine());
+                            int studentId;
+                            
+                        while(!int.TryParse(Console.ReadLine(), out studentId))
+                        {
+                            Console.WriteLine("Fel! Ange ett nummer");
+                        }
 
                             ADO.ViewStudentFullInfo(studentId);
                             break;
